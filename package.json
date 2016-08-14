@@ -1,7 +1,7 @@
 {
-  "name": "ex",
+  "name": "oppish-translator",
   "version": "1.1.1",
-  "description": "ex: An Ionic project",
+  "description": "Oppish Translator: An app to translate to and from the oppish language.",
   "dependencies": {
     "gulp": "^3.5.6",
     "gulp-sass": "^2.0.4",
