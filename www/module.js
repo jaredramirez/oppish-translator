@@ -1,4 +1,4 @@
-angular.module('translator', ['ionic'])
+angular.module('translator', ['ionic', 'translator.controllers'])
 
 .run(function($ionicPlatform) {
   $ionicPlatform.ready(function() {
@@ -13,15 +13,4 @@ angular.module('translator', ['ionic'])
   });
 })
 
-.config(function($stateProvider, $urlRouterProvider) {
-  $stateProvider
-    .state('translator', {
-      url: '/translator'
-    })
-    .state('translator.english', {
-      url: '/english',
-      templateUrl: 'components/english/index.html'
-    });
-
-  $urlRouterProvider.otherwise('/translator/english');
-});
+.config(routes);

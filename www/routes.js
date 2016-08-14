@@ -1,4 +1,4 @@
-function($stateProvider, $urlRouterProvider) {
+function routes($stateProvider, $urlRouterProvider) {
   $stateProvider
     .state('english', {
       url: '/english',
