@@ -1,1 +1,1 @@
-angular.module('translator.controllers', [])
+angular.module('translator.controllers', []);

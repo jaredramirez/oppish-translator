@@ -1,4 +1,4 @@
-angular.module('translator', ['ionic', 'translator.controllers'])
+angular.module('translator', ['ionic', 'translator.controllers', 'translator.services'])
 
 .run(function($ionicPlatform) {
   $ionicPlatform.ready(function() {
