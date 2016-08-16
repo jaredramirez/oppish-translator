@@ -1,5 +1,5 @@
 angular.module('translator.controllers')
-.controller('TranslatorController', ['$scope', 'SyllableServcie', function($scope, SyllableServcie) {
+.controller('TranslatorController', ['$scope', 'TranslatorServcie', function($scope, TranslatorServcie) {
   var i;
   this.output = '';
 
@@ -10,8 +10,8 @@ angular.module('translator.controllers')
     for(i=0;i<words.length;i++) {
       if(isEnglish(words[i])) {
         var translatedWord = words[i] + '!';
-        
-        SyllableServcie.countSyllables(words[i]);
+
+        TranslatorServcie.countSyllables(words[i]);
 
         translatedWords += (translatedWord + ' ');
       } else {
