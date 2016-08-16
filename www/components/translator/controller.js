@@ -10,7 +10,9 @@ angular.module('translator.controllers')
     for(i=0;i<words.length;i++) {
       if(isEnglish(words[i])) {
         var translatedWord = words[i] + '!';
-        SyllableServcie.print();
+        
+        SyllableServcie.countSyllables(words[i]);
+
         translatedWords += (translatedWord + ' ');
       } else {
         translatedWords += (words[i] + ' ');
