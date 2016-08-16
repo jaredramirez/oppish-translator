@@ -1,9 +1,11 @@
 function routes($stateProvider, $urlRouterProvider) {
   $stateProvider
-    .state('english', {
-      url: '/english',
-      templateUrl: 'components/english/index.html'
+    .state('translator', {
+      url: '/translator',
+      templateUrl: 'components/translator/index.html',
+      controller: 'TranslatorController',
+      controllerAs: 'TranslatorCtrl'
     });
 
-  $urlRouterProvider.otherwise('/english');
+  $urlRouterProvider.otherwise('/translator');
 }
