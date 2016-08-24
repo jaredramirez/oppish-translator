@@ -1,54 +1,29 @@
 angular.module('translator.controllers')
 .controller('TranslatorController', ['$scope', 'TranslatorServcie', function($scope, TranslatorServcie) {
-  var i;
-  this.output = '';
+  var i, that = this;
+  this.op = {
+    input: '',
+    output: ''
+  };
 
   this.translate = function() {
-    if(this.input.substr(-1) !== ' ') { return; }
+    if(that.op.input === '') {
+      that.op.output = '';
+      return;
+    }
 
-    var words = this.input.split(' ').slice(0, -1);
-    TranslatorServcie.translate(words).then(function(translatedWords) {
-      console.log('translatedWords', translatedWords);
-      this.output = translatedWords;
-    }, function(error) {
+    var words = that.op.input.split(' ');
+    if(words.length === 0) {
+      words = [that.op.input];
+    }
+    console.log('words', words);
 
-    });
-  }
-}]);
-
-
-
-/*
-var i;
-this.output = '';
-
-this.translate = function() {
-  if(this.input.substr(-1) !== ' ') { return; }
-  var words = this.input.split(' ').slice(0, -1), translatedWords = '', i;
-
-  for(i=0;i<words.length;i++) {
-    if(isEnglish(words[i])) {
-
-      TranslatorServcie.translateWord(words[i]).then(function(translatedWord) {
-        console.log('translatedWord', translatedWord);
-        translatedWords += (translatedWord + ' ');
+    TranslatorServcie.translate(words)
+      .then(function(translatedWords) {
+        that.op.output = translatedWords.join(' '); ;
+      }, function(error) {
+        console.log(error);
       });
 
-    } else {
-      translatedWords += (words[i] + ' ');
-    }
   }
-
-  this.output = translatedWords;
-}
-
-function isEnglish(word) {
-  var english = /^[A-Za-z0-9]*$/, i;
-
-  if(!english.test(word)) {
-    return false;
-  } else {
-    return true;
-  }
-}
-*/
+}]);

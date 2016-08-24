@@ -14,11 +14,18 @@ angular.module('translator.services')
       for(index in responses){
         var jsonResponse = x2js.xml_str2json(responses[index].data);
 
-        if(!angular.isDefined(jsonResponse.entry_list.entry)){
+        if(!angular.isDefined(jsonResponse) || jsonResponse === null || !angular.isDefined(jsonResponse.entry_list.entry)){
           translatedWords.push(words[index]);
         } else {
-          var syllables = getSyllables(jsonResponse);
-          var translatedWord = insertOp(syllables).join('');
+          var syllables = getSyllables(jsonResponse, words[index]),
+              translatedWord;
+
+          if(syllables !== words[index]) {
+            translatedWord = insertOp(syllables).join('');
+          } else {
+            translatedWord = words[index]
+          }
+
           translatedWords.push(translatedWord);
         }
       }
@@ -29,7 +36,7 @@ angular.module('translator.services')
     return deferred.promise;
   }
 
-  function getSyllables(jsonResponse) {
+  function getSyllables(jsonResponse, originalWord) {
     var ref;
     if(jsonResponse.entry_list.entry[0] === undefined) {
       ref = jsonResponse.entry_list.entry;
@@ -38,20 +45,23 @@ angular.module('translator.services')
     }
 
     if(ref.hw.__text) {
-      return [ref.hw.__text];
+      return ref.hw.__text.split("*");
     } else {
+      if(/\s/.test(ref.hw.split("*"))) {
+        return originalWord;
+      }
       return ref.hw.split("*");
     }
   }
 
   function insertOp(syllables) {
-    var translatedSyllables = [];
+    var translatedSyllables = [], i;
+
     for(syllable of syllables) {
       if(isEnglish(syllable)) {
-        var i;
         for(i=0;i<syllable.length;i++) {
           if(isVowel(syllable.charAt(i))) {
-            translatedSyllables.push(insert(syllable, i, 'op'));
+            translatedSyllables.push(insertChar(syllable, i, 'op'));
             break;
           };
         }
@@ -60,12 +70,12 @@ angular.module('translator.services')
     return translatedSyllables;
   }
 
-  function insert(str, index, value) {
+  function insertChar(str, index, value) {
     return str.substr(0, index) + value + str.substr(index);
   }
 
   function isEnglish(word) {
-    var english = /^[A-Za-z0-9']*$/, i;
+    var english = /^[A-Za-z']*$/, i;
 
     if(!english.test(word)) {
       return false;
@@ -75,7 +85,7 @@ angular.module('translator.services')
   }
 
   function isVowel(c) {
-    return ['a', 'e', 'i', 'o', 'u'].indexOf(c.toLowerCase()) !== -1
+    return ['a', 'e', 'i', 'o', 'u', 'y'].indexOf(c.toLowerCase()) !== -1;
   }
 
 }]);

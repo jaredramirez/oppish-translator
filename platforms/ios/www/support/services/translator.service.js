@@ -1,40 +1,42 @@
 angular.module('translator.services')
-.service('TranslatorServcie', ['$q', 'DictionaryServcie', 'x2js', function($q, DictionaryServcie, x2js) {
+.service('TranslatorServcie', ['$q', 'x2js', 'DictionaryServcie', function($q, x2js, DictionaryServcie) {
 
   this.translate = function(words) {
-    return $q(function(resolve, reject) {
-      var translatedWords = '', promiseList = [];
+    var deferred = $q.defer(),
+        translatedWords = [],
+        promises = [];
 
-      for(word of words) {
-        console.log('word', word)
-        promiseList.push(
-          DictionaryServcie.getDefinitionAsync(word).then(function(response) {
-            var jsonResponse = x2js.xml_str2json(response.data);
+    for(word of words) {
+      promises.push(DictionaryServcie.getDefinitionAsync(word));
+    }
 
-            if(!angular.isDefined(jsonResponse.entry_list.entry)){
-              translatedWords += (word + ' ');
-              console.log('1', word);
-            } else {
-              var syllables = getSyllables(jsonResponse);
-              var translatedWord = insertOp(syllables).join('');
-              console.log('2', translatedWord);
+    $q.all(promises).then(function(responses) {
+      for(index in responses){
+        var jsonResponse = x2js.xml_str2json(responses[index].data);
 
-              translatedWords += (translatedWord + ' ');
-            }
+        if(!angular.isDefined(jsonResponse) || jsonResponse === null || !angular.isDefined(jsonResponse.entry_list.entry)){
+          translatedWords.push(words[index]);
+        } else {
+          var syllables = getSyllables(jsonResponse, words[index]),
+              translatedWord;
+
+          if(syllables !== words[index]) {
+            translatedWord = insertOp(syllables).join('');
+          } else {
+            translatedWord = words[index]
           }
-        ));
+
+          translatedWords.push(translatedWord);
+        }
       }
 
-      $q.all(promiseList).then(function(successResponse){
-        resolve(translatedWords);
-      }, function(errorResponse){
-        reject(errorResponse);
-      });
+      deferred.resolve(translatedWords);
     });
+
+    return deferred.promise;
   }
 
-  function getSyllables(jsonResponse) {
-
+  function getSyllables(jsonResponse, originalWord) {
     var ref;
     if(jsonResponse.entry_list.entry[0] === undefined) {
       ref = jsonResponse.entry_list.entry;
@@ -43,20 +45,23 @@ angular.module('translator.services')
     }
 
     if(ref.hw.__text) {
-      return [ref.hw.__text];
+      return ref.hw.__text.split("*");
     } else {
+      if(/\s/.test(ref.hw.split("*"))) {
+        return originalWord;
+      }
       return ref.hw.split("*");
     }
   }
 
   function insertOp(syllables) {
-    var translatedSyllables = [];
+    var translatedSyllables = [], i;
+
     for(syllable of syllables) {
       if(isEnglish(syllable)) {
-        var i;
         for(i=0;i<syllable.length;i++) {
           if(isVowel(syllable.charAt(i))) {
-            translatedSyllables.push(insert(syllable, i, 'op'));
+            translatedSyllables.push(insertChar(syllable, i, 'op'));
             break;
           };
         }
@@ -65,12 +70,12 @@ angular.module('translator.services')
     return translatedSyllables;
   }
 
-  function insert(str, index, value) {
+  function insertChar(str, index, value) {
     return str.substr(0, index) + value + str.substr(index);
   }
 
   function isEnglish(word) {
-    var english = /^[A-Za-z0-9']*$/, i;
+    var english = /^[A-Za-z']*$/, i;
 
     if(!english.test(word)) {
       return false;
@@ -80,7 +85,94 @@ angular.module('translator.services')
   }
 
   function isVowel(c) {
-    return ['a', 'e', 'i', 'o', 'u'].indexOf(c.toLowerCase()) !== -1
-}
+    return ['a', 'e', 'i', 'o', 'u', 'y'].indexOf(c.toLowerCase()) !== -1;
+  }
 
 }]);
+
+/*
+
+.then(function(response) {
+  var jsonResponse = x2js.xml_str2json(response.data);
+  console.log('jsonResponse', jsonResponse);
+
+  if(!angular.isDefined(jsonResponse.entry_list.entry)){
+    translatedWords.push({index: words.indexOf(word), word: word});
+  } else {
+    var syllables = getSyllables(jsonResponse);
+    var translatedWord = insertOp(syllables).join('');
+    translatedWords.push({index: words.indexOf(word), word: translatedWord});
+  }
+})
+
+//uses $q.all
+this.translate_old = function(words) {
+  var deferred = $q.defer(),
+      translatedWords = [],
+      promises = [];
+
+  console.log('words', words);
+  angular.forEach(words, function(word){
+    console.log('word', word);
+    promises.push(
+      DictionaryServcie.getDefinitionAsync(word).then(function(response) {
+        var jsonResponse = x2js.xml_str2json(response.data);
+
+        if(!angular.isDefined(jsonResponse.entry_list.entry)){
+          console.log('translatedWord', word);
+          translatedWords.push(word);
+        } else {
+          var syllables = getSyllables(jsonResponse);
+          var translatedWord = insertOp(syllables).join('');
+          console.log('translatedWord', translatedWord);
+          translatedWords.push(translatedWord);
+        }
+      }
+    ));
+  });
+
+  console.log('promises', promises);
+  $q.all(promises).then(function() {
+    console.log('translatedWords', translatedWords);
+    deferred.resolve(translatedWords);
+  });
+
+  return deferred.promise;
+}
+
+//uses reduce
+this.translate = function(words) {
+  var deferred = $q.defer(),
+      translatedWords = [],
+      promises = [];
+
+  angular.forEach(words, function(word){
+    promises.push(
+      {promise: DictionaryServcie.getDefinitionAsync(word), word: word}
+    );
+  });
+
+  var chain = promises.reduce(function (previous, current) {
+    return current.promise.then(function(response) {
+      var jsonResponse = x2js.xml_str2json(response.data);
+
+      if(!angular.isDefined(jsonResponse.entry_list.entry)){
+        var array = previous.$$state.value;
+        return current.word;
+      } else {
+        var syllables = getSyllables(jsonResponse);
+        var translatedWord = insertOp(syllables).join('');
+
+        return translatedWord
+      }
+    })
+  }, $q.when([]));
+
+  chain.then(function (lastValue) {
+    console.log('lastValue', lastValue);
+    deferred.resolve(translatedWords);
+  });
+
+  return deferred.promise;
+}
+*/

@@ -39,7 +39,7 @@
     <author email="jaredramirez@me.com" href="http://github.com/jaredramirez/oppish-translator">
       Jared Ramirez
     </author>
-    <content original-src="index.html" src="http://192.168.0.2:8100" />
+    <content src="index.html" />
     <access origin="*" />
     <icon height="57" src="resources/ios/icon/icon.png" width="57" />
     <icon height="114" src="resources/ios/icon/icon@2x.png" width="114" />
