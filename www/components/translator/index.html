@@ -1,16 +1,16 @@
-<ion-view>
+<ion-view id="translator-container">
   <ion-nav-title>
     Oppish Translator
   </ion-nav-title>
 
   <ion-content>
-    <ion-item>
-      <input ng-model="TranslatorCtrl.input" ng-change="TranslatorCtrl.translate()" ng-trim="false"
+    <ion-item class="input">
+      <input ng-model="TranslatorCtrl.op.input" ng-change="TranslatorCtrl.translate()" ng-trim="false"
        type="text" placeholder="Enter word or phrase..."
       />
     </ion-item>
-    <ion-item>
-      <lable ng-bind="TranslatorCtrl.output"></label>
+    <ion-item class="output">
+      <label ng-bind="TranslatorCtrl.op.output"></label>
     </ion-item>
   </ion-content>
 </ion-view>

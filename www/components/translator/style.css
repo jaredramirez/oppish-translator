@@ -1,0 +1,14 @@
+/*sets base height for the items*/
+#translator-container .item {
+  height: 4.5em;
+}
+
+/*sets base height for the items*/
+#translator-container .input.item input {
+  width: 100%;
+}
+
+/*sets base height for the items*/
+#translator-container .output.item {
+
+}

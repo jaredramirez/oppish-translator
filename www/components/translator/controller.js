@@ -1,38 +1,26 @@
 angular.module('translator.controllers')
 .controller('TranslatorController', ['$scope', 'TranslatorServcie', function($scope, TranslatorServcie) {
-  var i;
-  this.output = '';
+  var i, that = this;
+  this.op = {
+    input: '',
+    output: ''
+  };
 
   this.translate = function() {
-    if(this.input.substr(-1) !== ' ') { return; }
-    var words = this.input.split(' ').slice(0, -1), translatedWords = '', i;
-
-    for(i=0;i<words.length;i++) {
-      if(isEnglish(words[i])) {
-        var translatedWord = words[i] + '!';
-
-        TranslatorServcie.countSyllables(words[i]);
-
-        translatedWords += (translatedWord + ' ');
-      } else {
-        translatedWords += (words[i] + ' ');
-      }
+    if(this.op.input.substr(-1) !== ' ') { return; }
+    if(this.op.input === '') {
+      this.output = '';
+      return;
     }
 
-    this.output = translatedWords;
-  }
+    var words = this.op.input.split(' ').slice(0, -1);
 
-  function isEnglish(word) {
-    var english = /^[A-Za-z0-9]*$/, i;
-
-    if(!english.test(word)) {
-      return false;
-    } else {
-      return true;
-    }
-  }
-
-  function translatedWord(word) {
+    TranslatorServcie.translate(words)
+      .then(function(translatedWords) {
+        that.op.output = translatedWords.join(' '); ;
+      }, function(error) {
+        console.log(error);
+      });
 
   }
 }]);
