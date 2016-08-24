@@ -10,5 +10,7 @@
 
 /*sets base height for the items*/
 #translator-container .output.item {
-
+  align-items: center;
+  display: flex;
+  top: 0;
 }
